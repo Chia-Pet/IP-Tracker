@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>IP Subnet Table</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    // Custom Tailwind color config
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            // Primary Colors
+            'primary-cyan': '#00c1de',  // Pantone 311
+            'primary-yellow': '#fee01e', // Pantone 107
+            'primary-blue': '#00376e',   // Pantone 294
+            'primary-gray': '#76787a',   // Pantone Cool Gray 9
+
+            // Secondary Colors
+            'secondary-teal': '#0091b2', // Pantone 632
+            'secondary-yellow': '#d8c722' // Pantone 611
+          }
+        }
+      }
+    };
+  </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-primary-blue text-white shadow-lg dark:bg-gray-800">
+            <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+                <h1 class="text-2xl font-bold">IP Subnet Table</h1>
+                <div class="flex items-center space-x-4">
+                    <span class="text-sm">Welcome, Me</span>
+                    <button id="theme-toggle" type="button" class="text-white hover:text-primary-yellow focus:outline-none">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 py-8">
+            <!-- Tab Navigation -->
+            <div class="mb-4 border-b border-gray-200">
+                <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="myTab" role="tablist">
+                    <li class="mr-2" role="presentation">
+                        <button class="inline-block p-4 border-b-2 rounded-t-lg border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 focus:outline-none" id="search-tab" type="button" role="tab" aria-controls="search" aria-selected="false">Search</button>
+                    </li>
+                    <li class="mr-2" role="presentation">
+                        <button class="inline-block p-4 border-b-2 rounded-t-lg border-transparent text-gray-500 hover:text-gray-600 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300 focus:outline-none" id="add-ip-tab" type="button" role="tab" aria-controls="add-ip" aria-selected="false">Add IP</button>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Tab Content -->
+            <div id="tabContent">
+                <!-- Search Tab -->
+                <div id="search" class="hidden" role="tabpanel" aria-labelledby="search-tab">
+                    <div class="mb-4">
+                        <div class="flex items-center space-x-2">
+                            <input type="text" id="searchInput" class="flex-grow p-2 rounded border border-gray-300 focus:outline-none focus:ring-primary-cyan focus:border-primary-cyan dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="Search by IP or Account Number...">
+                            <button id="submitBtn" class="bg-primary-blue text-white px-4 py-2 rounded hover:bg-secondary-teal dark:bg-primary-cyan dark:hover:bg-secondary-teal">Submit</button>
+                            <button id="clearBtn" class="bg-primary-gray text-white px-4 py-2 rounded hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-500">Clear</button>
+                        </div>
+                    </div>
+                    <p id="search-placeholder" class="text-gray-500 dark:text-gray-400">Enter a search term to begin.</p>
+                    <p id="no-results" class="hidden text-gray-500 dark:text-gray-400">No matching entries found.</p>
+                    <div id="results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- IP cards will be injected here -->
+                    </div>
+                </div>
+
+                <!-- Add IP Tab -->
+                <div id="add-ip" class="hidden" role="tabpanel" aria-labelledby="add-ip-tab">
+                    <form id="addIpForm" class="space-y-4">
+                        <div>
+                            <label for="ip" class="block text-sm font-medium text-gray-700 dark:text-gray-300">IP Address</label>
+                            <input type="text" name="ip" id="ip" class="mt-1 block w-full p-2 rounded border border-gray-300 focus:outline-none focus:ring-primary-cyan focus:border-primary-cyan dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        </div>
+                        <div>
+                            <label for="subnet" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Subnet</label>
+                            <input type="text" name="subnet" id="subnet" class="mt-1 block w-full p-2 rounded border border-gray-300 focus:outline-none focus:ring-primary-cyan focus:border-primary-cyan dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        </div>
+                        <div>
+                            <label for="gateway" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Gateway</label>
+                            <input type="text" name="gateway" id="gateway" class="mt-1 block w-full p-2 rounded border border-gray-300 focus:outline-none focus:ring-primary-cyan focus:border-primary-cyan dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        </div>
+                        <div>
+                            <label for="used" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Used</label>
+                            <select id="used" name="used" class="mt-1 block w-full p-2 rounded border border-gray-300 focus:outline-none focus:ring-primary-cyan focus:border-primary-cyan dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <option value="false">False</option>
+                                <option value="true">True</option>
+                            </select>
+                        </div>
+                        <div id="accountNumberField" class="hidden">
+                            <label for="account_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Account Number</label>
+                            <input type="text" name="account_number" id="account_number" class="mt-1 block w-full p-2 rounded border border-gray-300 focus:outline-none focus:ring-primary-cyan focus:border-primary-cyan dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        </div>
+                        <div id="typeField" class="hidden">
+                            <label for="type" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
+                            <select id="type" name="type" class="mt-1 block w-full p-2 rounded border border-gray-300 focus:outline-none focus:ring-primary-cyan focus:border-primary-cyan dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <option value="Reserved">Reserved</option>
+                                <option value="Static">Static</option>
+                            </select>
+                        </div>
+                        <div id="macField" class="hidden">
+                            <label for="mac" class="block text-sm font-medium text-gray-700 dark:text-gray-300">MAC Address</label>
+                            <input type="text" name="mac" id="mac" class="mt-1 block w-full p-2 rounded border border-gray-300 focus:outline-none focus:ring-primary-cyan focus:border-primary-cyan dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="e.g., 00:1A:2B:3C:4D:5E">
+                        </div>
+                        <div id="boundField" class="hidden">
+                            <label for="bound" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Bound</label>
+                            <select id="bound" name="bound" class="mt-1 block w-full p-2 rounded border border-gray-300 focus:outline-none focus:ring-primary-cyan focus:border-primary-cyan dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <option value="false">False</option>
+                                <option value="true">True</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="bg-primary-blue text-white px-4 py-2 rounded hover:bg-secondary-teal dark:bg-primary-cyan dark:hover:bg-secondary-teal">Add IP</button>
+                    </form>
+                    <div id="addSuccessMessage" class="hidden mt-4 p-4 text-sm text-green-700 bg-green-100 rounded-lg dark:bg-green-200 dark:text-green-800" role="alert">
+                        IP address added successfully.
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+       <!-- Edit IP Modal -->
+       <div id="editIpModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+           <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white dark:bg-gray-800">
+               <div class="flex justify-between items-center pb-3">
+                   <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Edit IP Address</h3>
+                   <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600 dark:hover:text-white">
+                       <i class="fas fa-times fa-lg"></i>
+                   </button>
+               </div>
+               <div id="editModalContent" class="space-y-4">
+                   <!-- Dynamic form content will be injected here -->
+               </div>
+               <div id="editSuccessMessageModal" class="hidden mt-4 p-4 text-sm text-green-700 bg-green-100 rounded-lg dark:bg-green-200 dark:text-green-800" role="alert">
+                   IP address updated successfully.
+               </div>
+           </div>
+       </div>
+       <!-- Footer -->
+       <footer class="bg-white py-4 border-t mt-8 dark:bg-gray-800 dark:border-gray-700">
+            <div class="container mx-auto px-4 text-center text-gray-500 text-sm dark:text-gray-400">
+                &copy; 2025 Manni — IP-Tracker. Built by Manni.
+            </div>
+        </footer>
+    </div>
+  <script>
+    document.write(`<script src="main.js?v=${new Date().getTime()}"><\/script>`);
+  </script>
+</body>
+</html>
